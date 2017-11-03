@@ -15,5 +15,10 @@
     "API"
   ],
   "author": "Moises Sacal",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "axios": "^0.17.0",
+    "common-tags": "^1.4.0",
+    "xml2js": "^0.4.19"
+  }
 }
