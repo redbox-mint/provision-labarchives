@@ -4,7 +4,7 @@
   "description": "Project to Test Lab archives APIs",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "./node_modules/mocha/bin/mocha --reporter spec test/*.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +21,8 @@
     "common-tags": "^1.4.0",
     "underscore": "^1.8.3",
     "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
   }
 }
