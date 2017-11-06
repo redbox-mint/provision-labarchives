@@ -58,6 +58,6 @@ if the password is incorrect or the configuration file is incorrect it returns `
 ### To run the test suite:
 
 ```bash
-USERNAME='USER' PASSWORD='PWD' KEY='{"akid":"AKID", "password":"PWD"}' UID_1='USER_ID' NBID_1='NOTEBOOK_ID' npm run test
+USERNAME='USER' PASSWORD='PWD' KEY='{"akid":"AKID", "password":"PWD"}' UID_1='OTHER_USER_ID' NBID_1='NOTEBOOK_ID' npm run test
 ```
 
