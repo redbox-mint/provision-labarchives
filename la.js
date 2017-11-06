@@ -2,6 +2,7 @@ const axios = require('axios');
 const config = require('./config.json');
 const crypto = require('crypto');
 const tags = require('common-tags');
+const _ = require('underscore');
 
 module.exports = {
   callAuthentication: function (key, method) {
@@ -34,5 +35,91 @@ module.exports = {
       .catch((error) => {
         return Promise.reject(error.message)
       })
+  },
+  getDefaultNoteBook: function (userNBs) {
+    return _.find(userNBs.notebook, (item) => {
+      return item['is-default']._ === 'true';
+    });
+  },
+  getNotebookInfo: function (key, uid, nbid) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'notebook_info';
+    const callAuth = this.callAuthentication(key, method);
+    return axios
+      .get(
+        tags.oneLineTrim`
+        ${config.baseurl}${config.api}/notebooks/${method}
+        ?uid=${uid}&nbid=${nbid}
+        &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
+        `
+        , base
+      )
+      .then((response) => {
+        return Promise.resolve(response.data);
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+  getTree: function (key, uid, nbid, parentTreeId) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'get_tree_level';
+    const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
+    req += `?uid=${uid}&nbid=${nbid}&parent_tree_id=${parentTreeId}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return Promise.resolve(response.data);
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+  insertNode: function (key, uid, nbid, parentTreeId, displayText, isFolder) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'insert_node';
+    const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
+    req += `?uid=${uid}&nbid=${nbid}&parent_tree_id=${parentTreeId}&display_text=${displayText}&is_folder=${isFolder}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return Promise.resolve(response.data);
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      });
+  },
+  addEntry: function (key, uid, nbid, pid, partType, entryData) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'add_entry';
+    const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    req += `?uid=${uid}&nbid=${nbid}&pid=${pid}&part_type=${partType}&entry_data=${entryData}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return Promise.resolve(response.data);
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      });
   }
+
 };
