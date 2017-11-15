@@ -27,15 +27,10 @@ let userInfo = {};
 describe('Login', function () {
   it('should return access info', function (done) {
     la.accessInfo(key, USERNAME, PASSWORD)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
-          userInfo = result.users;
-          assert(userInfo.email, USERNAME);
-          done();
-        });
+      .then((result) => {
+        userInfo = result.users;
+        assert(userInfo.email, USERNAME);
+        done();
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -50,16 +45,11 @@ describe('Notebook', function () {
     const dNB = la.getDefaultNoteBook(userInfo.notebooks);
     la
       .getNotebookInfo(key, userInfo.id, dNB.id)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
-          notebook = result.notebooks.notebook;
-          assert(notebook.name, dNB.id);
-          // the is-student flag is always false in our PE (Professional Edition)
-          done();
-        });
+      .then((result) => {
+        notebook = result.notebooks.notebook;
+        assert(notebook.name, dNB.id);
+        // the is-student flag is always false in our PE (Professional Edition)
+        done();
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -72,17 +62,12 @@ describe('Notebook', function () {
     const dNB = la.getDefaultNoteBook(userInfo.notebooks);
     la
       .getTree(key, userInfo.id, notebook.id, '0')
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
-          const tree = result['tree-tools'];
-          assert(tree);
-          assert(tree['level-nodes']);
-          treeNodes = tree['level-nodes'];
-          done();
-        });
+      .then((result) => {
+        const tree = result['tree-tools'];
+        assert(tree);
+        assert(tree['level-nodes']);
+        treeNodes = tree['level-nodes'];
+        done();
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -95,17 +80,11 @@ describe('Notebook', function () {
     const displayText = 'Testing a inserting a node';
     la
       .insertNode(key, userInfo.id, notebook.id, 0, displayText, false)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
-          const tree = result['tree-tools'];
-          node = tree['node'];
-          assert(node['display-text'], displayText);
-          done();
-
-        });
+      .then((result) => {
+        const tree = result['tree-tools'];
+        node = tree['node'];
+        assert(node['display-text'], displayText);
+        done();
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -117,16 +96,11 @@ describe('Notebook', function () {
     const partType = 'plain text entry';
     la
       .addEntry(key, userInfo.id, notebook.id, node['tree-id'], partType, workspaceId)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
-          const entries = result['entries'];
-          entry = entries['entry'];
-          assert(entry['part-type'], partType);
-          done();
-        });
+      .then((result) => {
+        const entries = result['entries'];
+        entry = entries['entry'];
+        assert(entry['part-type'], partType);
+        done();
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));

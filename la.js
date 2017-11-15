@@ -3,6 +3,8 @@ const config = require('./config.json');
 const crypto = require('crypto');
 const tags = require('common-tags');
 const _ = require('underscore');
+const xml2js = require('xml2js');
+const parser = new xml2js.Parser({explicitArray: false});
 
 module.exports = {
   callAuthentication: function (key, method) {
@@ -30,7 +32,16 @@ module.exports = {
         , base
       )
       .then((response) => {
-        return Promise.resolve(response.data);
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
       })
       .catch((error) => {
         return Promise.reject(error.message)
@@ -58,7 +69,16 @@ module.exports = {
         , base
       )
       .then((response) => {
-        return Promise.resolve(response.data);
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
       })
       .catch((error) => {
         return Promise.reject(error.message)
@@ -77,7 +97,16 @@ module.exports = {
     return axios
       .get(req, base)
       .then((response) => {
-        return Promise.resolve(response.data);
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
       })
       .catch((error) => {
         return Promise.reject(error.message)
@@ -96,7 +125,16 @@ module.exports = {
     return axios
       .get(req, base)
       .then((response) => {
-        return Promise.resolve(response.data);
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
       })
       .catch((error) => {
         return Promise.reject(error.message)
@@ -115,7 +153,16 @@ module.exports = {
     return axios
       .get(req, base)
       .then((response) => {
-        return Promise.resolve(response.data);
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
       })
       .catch((error) => {
         return Promise.reject(error.message)
