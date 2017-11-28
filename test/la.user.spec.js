@@ -27,15 +27,10 @@ let userInfo = {};
 describe('Login', function () {
   it('should return access info', function (done) {
     la.accessInfo(key, USERNAME, PASSWORD)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
+      .then((result) => {
           userInfo = result.users;
           assert(userInfo.email, USERNAME);
           done();
-        });
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -52,17 +47,12 @@ describe('Test Notebook from another user', function () {
   it('should get another person notebook', function (done) {
     la
       .getTree(key, nuid, nnbid, '0')
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
+      .then((result) => {
           const tree = result['tree-tools'];
           assert(tree);
           assert(tree['level-nodes']);
           treeNodes = tree['level-nodes'];
           done();
-        });
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -74,17 +64,11 @@ describe('Test Notebook from another user', function () {
     const displayText = 'Testing a inserting a node';
     la
       .insertNode(key, nuid, nnbid, 0, displayText, false)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
+      .then((result) => {
           const tree = result['tree-tools'];
           node = tree['node'];
           assert(node['display-text'], displayText);
           done();
-
-        });
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));
@@ -92,20 +76,15 @@ describe('Test Notebook from another user', function () {
   });
   let entry = {};
   it('should add entry into node', function (done) {
-    const workspaceId = '123123123123';
+    const workspaceId = 'Moises has hacked you... ';
     const partType = 'plain text entry';
     la
       .addEntry(key, nuid, nnbid, node['tree-id'], partType, workspaceId)
-      .then((response) => {
-        parser.parseString(response, function (err, result) {
-          if (err) {
-            assert.fail(err);
-          }
+      .then((result) => {
           const entries = result['entries'];
           entry = entries['entry'];
           assert(entry['part-type'], partType);
           done();
-        });
       })
       .catch((error) => {
         console.log(util.inspect(error, {depth: null}));

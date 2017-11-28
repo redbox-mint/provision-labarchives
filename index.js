@@ -25,9 +25,7 @@ if (fs.existsSync(keyPath)) {
 if (username && password) {
   la.accessInfo(key, username, password)
     .then((response) => {
-      parseString(response, function (err, result) {
-        console.log(util.inspect(result, false, null));
-      });
+        console.log(util.inspect(response, false, null));
     })
     .catch((error) => {
       console.log(util.inspect(error, {depth: null}));
