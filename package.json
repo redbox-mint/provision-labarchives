@@ -1,20 +1,20 @@
 {
   "name": "provision-labarchives",
   "version": "1.0.0",
-  "description": "Project to Test Lab archives APIs",
-  "main": "index.js",
+  "description": "Lab archives APIs interface for node",
+  "main": "la.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --reporter spec test/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://135553@codeine.research.uts.edu.au/eresearch/provision-labarchives.git"
+    "url": "git@codeine.research.uts.edu.au:eresearch/provision-labarchives.git",
   },
   "keywords": [
     "labarchives",
     "API"
   ],
-  "author": "Moises Sacal",
+  "author": "Moises Sacal Bonequi",
   "license": "GPL-3.0",
   "dependencies": {
     "axios": "^0.17.0",
