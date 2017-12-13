@@ -27,26 +27,26 @@ it should return a json; example:
 ```js
 { users: 
    { id: [ 'XXXXXX' ],
-     fullname: [ 'Moises Sacal' ],
-     'first-name': [ 'Moises' ],
-     'last-name': [ 'Sacal' ],
-     email: [ 'moises.sacal@uts.edu.au' ],
+     fullname: [ 'John Smith' ],
+     'first-name': [ 'John' ],
+     'last-name': [ 'Smith' ],
+     email: [ 'john.smithl@org.edu.au' ],
      notebooks: 
       [ { '$': { type: 'array' },
           notebook: 
            [ { id: [ 'XXXXXX' ],
-               name: [ 'moises' ],
+               name: [ 'john' ],
                'is-default': [ { _: 'false', '$': { type: 'boolean' } } ] },
              { id: [ 'XXXXXX=' ],
-               name: [ 'newNotebook' ],
+               name: [ 'new notebook' ],
                'is-default': [ { _: 'false', '$': { type: 'boolean' } } ] },
              { id: [ 'XXXXXX==' ],
-               name: [ 'UTS Rollout materials - use this to collaborate!' ],
+               name: [ 'new notebook 2' ],
                'is-default': [ { _: 'true', '$': { type: 'boolean' } } ] } ] } ],
      request: 
       [ { class: [ 'users' ],
           method: [ 'user_access_info' ],
-          'login-or-email': [ 'moises.sacal@uts.edu.au' ],
+          'login-or-email': [ 'john.smith@org.edu.au' ],
           akid: [ 'XXXXXX' ],
           expires: [ 'XXXXXX' ],
           sig: [ 'XXXXXX' ] } ] } }
