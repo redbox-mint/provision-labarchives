@@ -15,6 +15,38 @@ module.exports = {
     hash.update(salt);
     return {sig: encodeURIComponent(hash.digest('base64')), expires: epoch};
   },
+  institutionalLoginUrls: function(key, username, password) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'institutional_login_urls';
+    const callAuth = this.callAuthentication(key, method);
+    return axios
+      .get(
+        tags.oneLineTrim`
+        ${config.baseurl}${config.api}/utilities/${method}
+        ?login_or_email=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}
+        &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
+        `
+        , base
+      )
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
   accessInfo: function (key, username, password) {
     const base = {
       baseURL: config.baseurl,
@@ -26,7 +58,7 @@ module.exports = {
       .get(
         tags.oneLineTrim`
         ${config.baseurl}${config.api}/users/${method}
-        ?login_or_email=${username}&password=${password}
+        ?login_or_email=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}
         &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
         `
         , base

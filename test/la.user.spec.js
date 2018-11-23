@@ -14,6 +14,10 @@ const USERNAME = process.env.USERNAME;
 const PASSWORD = process.env.PASSWORD;
 const keyString = process.env.KEY;
 
+assert.notEqual(USERNAME, undefined, 'USERNAME missing; add environment variable');
+assert.notEqual(PASSWORD, undefined, 'PASSWORD missing; add environment variable');
+assert.notEqual(keyString, undefined, 'KEY missing; add environment variable');
+
 let key = {};
 
 try {
