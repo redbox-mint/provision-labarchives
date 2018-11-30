@@ -42,7 +42,8 @@ describe('Login', function () {
       });
   });
   it('should list users notebooks', function (done) {
-    la.userInfoViaId(key, userInfo.id)
+    const isAuth = true;
+    la.userInfoViaId(key, userInfo.id, isAuth)
       .then((result) => {
         const users = result.users;
         assert(users, 'responds with users');

@@ -15,7 +15,7 @@ module.exports = {
     hash.update(salt);
     return {sig: encodeURIComponent(hash.digest('base64')), expires: epoch};
   },
-  institutionalLoginUrls: function(key, username, password) {
+  institutionalLoginUrls: function (key, username, password) {
     const base = {
       baseURL: config.baseurl,
       timeout: 10000
@@ -79,18 +79,19 @@ module.exports = {
         return Promise.reject(error.message)
       })
   },
-  userInfoViaId: function (key, uid) {
+  userInfoViaId: function (key, uid, isAuth) {
     const base = {
       baseURL: config.baseurl,
       timeout: 10000
     };
     const method = 'user_info_via_id';
     const callAuth = this.callAuthentication(key, method);
+    const authenticated = isAuth ? '&=authenticated=true' : '';
     return axios
       .get(
         tags.oneLineTrim`
         ${config.baseurl}${config.api}/users/${method}
-        ?uid=${uid}
+        ?uid=${uid}${authenticated}
         &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
         `
         , base
