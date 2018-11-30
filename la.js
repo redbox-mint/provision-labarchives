@@ -208,15 +208,19 @@ module.exports = {
   addEntry: function (key, uid, nbid, pid, partType, entryData) {
     const base = {
       baseURL: config.baseurl,
-      timeout: 10000
+      timeout: 10000,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+      responseType: 'blob'
     };
     const method = 'add_entry';
     const callAuth = this.callAuthentication(key, method);
     let req = `${config.baseurl}${config.api}/entries/${method}`;
-    req += `?uid=${uid}&nbid=${nbid}&pid=${pid}&part_type=${partType}&entry_data=${entryData}`;
+    req += `?uid=${uid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     return axios
-      .get(req, base)
+      .post(req,
+        `part_type=${partType}&pid=${pid}&nbid=${nbid}&entry_data=${entryData}`
+        , base)
       .then((response) => {
         return new Promise(function (resolve, reject) {
           parser.parseString(response.data, function (err, result) {

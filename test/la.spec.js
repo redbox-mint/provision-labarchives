@@ -107,7 +107,7 @@ describe('Notebook', function () {
   });
   let entry = {};
   it('should add entry into node', function (done) {
-    const workspaceId = '123123123123';
+    const workspaceId = 'https://google.com?search=WORKSPACES';
     const partType = 'plain text entry';
     la
       .addEntry(key, userInfo.id, notebook.id, node['tree-id'], partType, workspaceId)

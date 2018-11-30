@@ -80,7 +80,7 @@ describe('Test Notebook from another user', function () {
   });
   let entry = {};
   it('should add entry into node', function (done) {
-    const workspaceId = 'Moises has hacked you... ';
+    const workspaceId = 'https://google.com?search=WORKSPACES';
     const partType = 'plain text entry';
     la
       .addEntry(key, nuid, nnbid, node['tree-id'], partType, workspaceId)
