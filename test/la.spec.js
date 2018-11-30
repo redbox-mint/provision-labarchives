@@ -41,6 +41,16 @@ describe('Login', function () {
         done();
       });
   });
+  it('should list users notebooks', function (done) {
+    la.userInfoViaId(key, userInfo.id)
+      .then((result) => {
+        const users = result.users;
+        assert(users, 'responds with users');
+        assert(users.notebooks, 'notebooks object exists');
+        assert(Array.isArray(users.notebooks.notebook), 'Notebooks found');
+        done();
+      })
+  })
 });
 
 let notebook = {};

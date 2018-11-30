@@ -79,6 +79,38 @@ module.exports = {
         return Promise.reject(error.message)
       })
   },
+  userInfoViaId: function (key, uid) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'user_info_via_id';
+    const callAuth = this.callAuthentication(key, method);
+    return axios
+      .get(
+        tags.oneLineTrim`
+        ${config.baseurl}${config.api}/users/${method}
+        ?uid=${uid}
+        &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
+        `
+        , base
+      )
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      });
+  },
   getDefaultNoteBook: function (userNBs) {
     return _.find(userNBs.notebook, (item) => {
       return item['is-default']._ === 'true';
