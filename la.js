@@ -202,7 +202,18 @@ module.exports = {
         });
       })
       .catch((error) => {
-        return Promise.reject(error.message)
+        let data = null;
+        if (error && error.response && error.response.data) {
+          data = error.response.data;
+        }
+        parser.parseString(data, function (err, result) {
+          if (err) {
+            return Promise.reject(err);
+          }
+          else {
+            return Promise.reject(result);
+          }
+        });
       });
   },
   addEntry: function (key, uid, nbid, pid, partType, entryData) {
