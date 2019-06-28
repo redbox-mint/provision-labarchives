@@ -87,15 +87,10 @@ module.exports = {
     const method = 'user_info_via_id';
     const callAuth = this.callAuthentication(key, method);
     const authenticated = isAuth ? '&=authenticated=true' : '';
+    uid = encodeURIComponent(uid);
+    const req = `${config.baseurl}${config.api}/users/${method}?uid=${uid}${authenticated}&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     return axios
-      .get(
-        tags.oneLineTrim`
-        ${config.baseurl}${config.api}/users/${method}
-        ?uid=${uid}${authenticated}
-        &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
-        `
-        , base
-      )
+      .get(req, base)
       .then((response) => {
         return new Promise(function (resolve, reject) {
           parser.parseString(response.data, function (err, result) {
@@ -124,6 +119,7 @@ module.exports = {
     };
     const method = 'notebook_info';
     const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
     return axios
       .get(
         tags.oneLineTrim`
@@ -156,6 +152,7 @@ module.exports = {
     };
     const method = 'get_tree_level';
     const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
     let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
     req += `?uid=${uid}&nbid=${nbid}&parent_tree_id=${parentTreeId}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
@@ -184,6 +181,7 @@ module.exports = {
     };
     const method = 'insert_node';
     const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
     let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
     req += `?uid=${uid}&nbid=${nbid}&parent_tree_id=${parentTreeId}&display_text=${displayText}&is_folder=${isFolder}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
@@ -225,6 +223,7 @@ module.exports = {
     };
     const method = 'add_entry';
     const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
     let req = `${config.baseurl}${config.api}/entries/${method}`;
     req += `?uid=${uid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
