@@ -36,8 +36,7 @@ module.exports = {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -54,22 +53,17 @@ module.exports = {
     };
     const method = 'user_access_info';
     const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/users/${method}`;
+    req += `?login_or_email=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     return axios
-      .get(
-        tags.oneLineTrim`
-        ${config.baseurl}${config.api}/users/${method}
-        ?login_or_email=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}
-        &akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}
-        `
-        , base
-      )
+      .get(req, base)
       .then((response) => {
         return new Promise(function (resolve, reject) {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -96,8 +90,7 @@ module.exports = {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -134,8 +127,7 @@ module.exports = {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -163,8 +155,7 @@ module.exports = {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -192,8 +183,7 @@ module.exports = {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -207,8 +197,7 @@ module.exports = {
         parser.parseString(data, function (err, result) {
           if (err) {
             return Promise.reject(err);
-          }
-          else {
+          } else {
             return Promise.reject(result);
           }
         });
@@ -236,8 +225,7 @@ module.exports = {
           parser.parseString(response.data, function (err, result) {
             if (err) {
               reject(err);
-            }
-            else {
+            } else {
               resolve(result);
             }
           });
@@ -246,6 +234,129 @@ module.exports = {
       .catch((error) => {
         return Promise.reject(error.message)
       });
+  },
+  createNotebook: function (key, uid, name, siteNotebookId, initialFolders) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'create_notebook';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/notebooks/${method}`;
+    req += `?uid=${encodeURIComponent(uid)}`;
+    req += `&name=${encodeURIComponent(name)}`;
+    if (initialFolders) {
+      req += `&initial_folders=${encodeURIComponent(initialFolders)}`;
+    }
+    if (siteNotebookId) {
+      req += `&site_notebook_id=${encodeURIComponent(siteNotebookId)}`;
+    }
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        let data = null;
+        if (error && error.response && error.response.data) {
+          data = error.response.data;
+        }
+        parser.parseString(data, function (err, result) {
+          if (err) {
+            return Promise.reject(err);
+          } else {
+            return Promise.reject(result);
+          }
+        });
+      });
+  },
+  emailHasAccount: function (key, email) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'email_has_account';
+    const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/users/${method}`;
+    req += `?email=${encodeURIComponent(email)}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        let data = null;
+        if (error && error.response && error.response.data) {
+          data = error.response.data;
+        }
+        parser.parseString(data, function (err, result) {
+          if (err) {
+            return Promise.reject(err);
+          } else {
+            return Promise.reject(result);
+          }
+        });
+      });
+  },
+  addUserToNotebook: function (key, uid, nbid, email, userRole) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'add_user_to_notebook';
+    const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/notebooks/${method}`;
+    req += `?uid=${encodeURIComponent(uid)}`;
+    req += `&nbid=${encodeURIComponent(nbid)}`;
+    req += `&email=${encodeURIComponent(email)}`;
+    if (userRole) {
+      req += `&user_role=${encodeURIComponent(userRole)}`;
+    }
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        let data = null;
+        if (error && error.response && error.response.data) {
+          data = error.response.data;
+        }
+        parser.parseString(data, function (err, result) {
+          if (err) {
+            return Promise.reject(err);
+          } else {
+            return Promise.reject(result);
+          }
+        });
+      });
   }
-
 };
