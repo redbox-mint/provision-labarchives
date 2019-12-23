@@ -1,6 +1,6 @@
 {
   "name": "@uts-eresearch/provision-labarchives",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Lab archives APIs interface for node",
   "main": "la.js",
   "scripts": {
