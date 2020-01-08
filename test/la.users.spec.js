@@ -22,7 +22,7 @@ try {
 }
 
 let userInfo = {};
-const email = 'Moises.Sacal@uts.edu.au';
+const email = USERNAME;
 
 describe('USER\'S API', function () {
   it('should test if email has account=', function (done) {

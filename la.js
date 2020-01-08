@@ -358,5 +358,48 @@ module.exports = {
           }
         });
       });
+  },
+  createUser: function (key, email, fullName, password) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'create_user_account';
+    const callAuth = this.callAuthentication(key, method);
+    let req = `${config.baseurl}${config.api}/users/${method}`;
+    req += `?email=${encodeURIComponent(email)}`;
+    if (fullName) {
+      req += `&fullname=${encodeURIComponent(fullName)}`;
+    }
+    if (password) {
+      req += `&password=${encodeURIComponent(password)}`;
+    }
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        let data = null;
+        if (error && error.response && error.response.data) {
+          data = error.response.data;
+        }
+        parser.parseString(data, function (err, result) {
+          if (err) {
+            return Promise.reject(err);
+          } else {
+            return Promise.reject(result);
+          }
+        });
+      });
   }
 };
