@@ -8,11 +8,14 @@ Create a key.json file with
 ```json
 {
   "akid": "",
-  "password": ""
+  "password": "",
+  "baseurl": "https://test.labarchives.com",
+  "api": "/api"
 }
+
 ```
 
-then run 
+then run
 
 `npm install`
 
@@ -25,15 +28,15 @@ node index.js 'username' 'password'
 it should return a json; example:
 
 ```js
-{ users: 
+{ users:
    { id: [ 'XXXXXX' ],
      fullname: [ 'John Smith' ],
      'first-name': [ 'John' ],
      'last-name': [ 'Smith' ],
      email: [ 'john.smithl@org.edu.au' ],
-     notebooks: 
+     notebooks:
       [ { '$': { type: 'array' },
-          notebook: 
+          notebook:
            [ { id: [ 'XXXXXX' ],
                name: [ 'john' ],
                'is-default': [ { _: 'false', '$': { type: 'boolean' } } ] },
@@ -43,7 +46,7 @@ it should return a json; example:
              { id: [ 'XXXXXX==' ],
                name: [ 'new notebook 2' ],
                'is-default': [ { _: 'true', '$': { type: 'boolean' } } ] } ] } ],
-     request: 
+     request:
       [ { class: [ 'users' ],
           method: [ 'user_access_info' ],
           'login-or-email': [ 'john.smith@org.edu.au' ],
