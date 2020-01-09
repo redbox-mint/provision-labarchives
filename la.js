@@ -241,7 +241,6 @@ module.exports = {
     };
     const method = 'create_notebook';
     const callAuth = this.callAuthentication(key, method);
-    uid = encodeURIComponent(uid);
     let req = `${key.baseurl}${key.api}/notebooks/${method}`;
     req += `?uid=${encodeURIComponent(uid)}`;
     req += `&name=${encodeURIComponent(name)}`;
