@@ -18,30 +18,37 @@ const keyPath = './key.json';
 let key = {};
 
 
-async function getPages(key, uid, nbid, parentId, dataset, dir) {
+async function getPages(key, uid, nbid, parentId, dataset, dir, rootDir) {
     const tree = await la.getTree(key, uid, nbid, parentId);
-    levelNodes = tree["tree-tools"]["level-nodes"]['level-node']
+    var levelNodes = tree["tree-tools"]["level-nodes"]['level-node']
     if (!Array.isArray(levelNodes)) {
         levelNodes = [levelNodes];
     }
     dataset.hasPart = [];
 
-    fs.mkdirp(dir);
-
     for (let node of levelNodes) {
-        const pageId = `#${node['tree-id']}`
-        var page = {"@id": pageId};
+        var page = {};
         page.name = node["display-text"];
-        dataset.hasPart.push({"@id": pageId});
+        var dirName = toDirName(page.name);
+        // TODO IF EXISTS MAKE ANOTHER ONE!!!
+        // NewDir is relative
+        const newDir = path.join(dir, dirName);
+        // dirPath is absolute
+        const dirPath = path.join(rootDir, newDir)
+        fs.mkdirSync(dirPath);
+        dataset.hasPart.push({"@id": newDir});
+        page["@id"] = newDir;
+        page["@type"] = ["Dataset"];
+        page.hasPart = [];
+
         crate.getGraph().push(page);
         if (node["is-page"]["_"] === 'true') {
-            console.log("FOUND A PAGE", node['tree-id']);
+            console.log("FOUND A PAGE", page.name);
             //console.log(dataset);
             //console.log(rootDataset);   
             //console.log("CRATE", JSON.stringify(crate.getJson()));
-            page["@type"] = ["Article"];
             page.articleBody = "";
-
+            page["@type"].push("Article");                
             const pageEntries = await la.getEntriesForPage(key, uid, nbid, node['tree-id']);
             
             //console.log(util.inspect(pageEntries, false, null));
@@ -51,37 +58,73 @@ async function getPages(key, uid, nbid, parentId, dataset, dir) {
                 if (!Array.isArray(entries)) {
                     entries = [entries];         
                 }
+                var text = "";
                 for (let entry of entries) {
-                    console.log("Getting entry with ID:", entry.eid);
-                    //const entry = await la.getEntry(key, uid, e.eid);
-                    console.log(util.inspect(entry, false, null));
+                    // This is the ID to use for entries - will prepend # for ones that are not files
+                    const entryUrl = path.join(newDir, entry.eid);
+                    
+                
 
+                    //console.log("Setting outDir", outDir);
+                    console.log("Getting entry with ID:", entry.eid);
+                    
                     if (entry["entry-data"] && !(entry["entry-data"]["$"] && entry["entry-data"]["$"]['nil']=== 'true')) {
                         // TODO Make separate pages w/ entries
-                        var text =  entry["entry-data"];
-                        if (entry['part-type'] === "heading") {
-                            text = `<h1>${text}</h1>`
-                        }
-                        page.articleBody += `${text}\n`;
+                        text +=  entry["entry-data"]; 
+                    } 
+                    //const entry = await la.getEntry(key, uid, e.eid);
+                    //console.log(util.inspect(entry, false, null));
+                    if (entry['part-type'] === "heading") {
+                        text += `<h1>${text}</h1>`
                     }
-                    if (entry["entry-type"]) {
+                    
+                    if (entry["part-type"] === "Attachment") {
+                        // Make a directory for each file
+                        // Absolute path
+                        // Relative ID/path to file
+                        const fileId = path.join(entryUrl, entry['attach-file-name']);
+                        // Absolute path to write file into
+                        const out = path.join(rootDir, fileId);
+                    
+                        const file = {"@id": fileId};
+                        file["@type"] = "File";
+                        crate.getGraph().push(file);
+                        page.hasPart.push({"@id": fileId});
+                        if (out.match(/\.(jpe?g|png)$/i)) {
+                            //console.log(util.inspect(entry, false, null));
+                            file.description = entry.caption;
+                            text += `<figure><img style='width:50%' src='${fileId}' alt='${entry.caption}'><br/><figcation>${entry.caption}</figcation></figure>`
+                        }            
+                        text += `<h2>⬇️🏷️ Download: <a href='${fileId}'>${entry['attach-file-name']}</a></h2>\n`;   
+                        // Make a directory for the file
+                        fs.mkdirpSync(path.join(rootDir, entryUrl));
+                        //Get the file
+                        await la.getEntryAttachment(key, uid, entry.eid, out);
+                    } 
 
+                    if (text.length > 0) {
+                        page.articleBody = text;
                     }
                     //const att = await la.getEntryAttachment(key, uid, e.eid);
                     //console.log(util.inspect(att, false, null));
                 }
             }
-
         } else {
             page["@type"] = "Dataset";
-            await getPages(key, uid, nbid, node["tree-id"], page, path.join(dir, node["tree-id"]))
+            console.log("Recursing into dir", page.name)
+                                   // key, uid, nbid, parentId,       dataset, dir,   rootDir
+            const done = await getPages(key, uid, nbid, node["tree-id"], page, newDir, rootDir)
         }
-        fs.writeFileSync("ro-crate-metadata.jsonld", JSON.stringify(crate.getJson(), null, 2))
+        fs.writeFileSync(path.join(rootDir, "ro-crate-metadata.jsonld"), JSON.stringify(crate.getJson(), null, 2))
 
         //const item = await la.getNode(key, uid, nbid, node['tree-id']);
         //console.log(util.inspect(item, false, null));
     }
     
+}
+
+function toDirName(string) {
+    return string.replace(/\W+/g, "_").replace(/_+$/,"").toLowerCase()
 }
 
 async function main(){
@@ -109,11 +152,13 @@ async function main(){
     }
     if (uid) {
         const nb = await la.getNotebookInfo(key, uid, nbid);
-        console.log(util.inspect(nb, false, null));
+        //console.log(util.inspect(nb, false, null));
         rootDataset.name = nb.notebooks.notebook["name"];
-        dir = rootDataset.name.toLowerCase().replace(/ +/g, "_").replace(/_+$/,"");
-        fs.removeSync(dir); // get rid of directory
-        await getPages(key, uid, nbid, 0, rootDataset, dir);
+        var directory = toDirName(rootDataset.name.toLowerCase());
+        directory = path.resolve(directory);
+        fs.removeSync(directory); // get rid of directory
+        fs.mkdirSync(directory);
+        await getPages(key, uid, nbid, 0, rootDataset, "", directory);
     }
      else {
         console.log('provide username and password');

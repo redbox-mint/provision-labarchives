@@ -5,6 +5,8 @@ const tags = require('common-tags');
 const _ = require('underscore');
 const xml2js = require('xml2js');
 const parser = new xml2js.Parser({explicitArray: false});
+const fs = require('fs-extra');
+
 
 module.exports = {
   callAuthentication: function (key, method) {
@@ -150,7 +152,6 @@ module.exports = {
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     req += `&entry_data=true&comment_data=true`;
 
-    console.log("REWQUEST", req)
 
     return axios
       .get(req, base)
@@ -169,10 +170,11 @@ module.exports = {
         return Promise.reject(error.message)
       })
   },
-  getEntryAttachment: function (key, uid, eid) {
+  getEntryAttachment: function (key, uid, eid, out) {
     const base = {
       baseURL: config.baseurl,
-      timeout: 10000
+      timeout: 10000,
+      responseType: 'stream'
     };
     const method = 'entry_attachment';
     const callAuth = this.callAuthentication(key, method);
@@ -185,16 +187,9 @@ module.exports = {
     return axios
       .get(req, base)
       .then((response) => {
-        return new Promise(function (resolve, reject) {
-          parser.parseString(response.data, function (err, result) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(result);
-            }
-          });
-        });
-      })
+        response.data.pipe(fs.createWriteStream(out));
+        
+        })
       .catch((error) => {
         return Promise.reject(error.message)
       })
