@@ -1,5 +1,4 @@
 const util = require('util');
-const parseString = require('xml2js').parseString;
 const fs = require('fs-extra');
 const la = require('./la');
 const ROCrate = require("ro-crate").ROCrate;
@@ -17,6 +16,26 @@ const password = process.argv[5];
 const keyPath = './key.json';
 let key = {};
 
+function addTextItem(page, text, entry, crate) {
+    page.hasPart.push(
+        {
+            "@id": `#${entry.eid}`
+        }
+
+    );
+    crate.getGraph().push({
+        "@id": `#${entry.eid}`,
+        "@type": ["Article"],
+        "articleBody": text,
+        "dateCreated": entry["created-at"]["_"],
+        "contributor": entry["last-modified-by"],
+        "version": entry["version"]["_"],
+        "description": `${entry["last-modified-verb"]} by ${entry["last-modified-by"]} at ${entry["created-at"]["_"]}`
+    });
+
+
+}
+var count= 0;
 
 async function getPages(key, uid, nbid, parentId, dataset, dir, rootDir) {
     const tree = await la.getTree(key, uid, nbid, parentId);
@@ -40,17 +59,17 @@ async function getPages(key, uid, nbid, parentId, dataset, dir, rootDir) {
         page["@id"] = newDir;
         page["@type"] = ["Dataset"];
         page.hasPart = [];
-
         crate.getGraph().push(page);
         if (node["is-page"]["_"] === 'true') {
-            console.log("FOUND A PAGE", page.name);
+            console.log("Page:", page.name);
             //console.log(dataset);
             //console.log(rootDataset);   
             //console.log("CRATE", JSON.stringify(crate.getJson()));
             page.articleBody = "";
-            page["@type"].push("Article");                
+            page["@type"].push("Article"); 
+                           
             const pageEntries = await la.getEntriesForPage(key, uid, nbid, node['tree-id']);
-            
+            page.text = [];
             //console.log(util.inspect(pageEntries, false, null));
             var entries = pageEntries["tree-tools"].entries.entry;
             // TODO - make entry dirs?
@@ -58,24 +77,48 @@ async function getPages(key, uid, nbid, parentId, dataset, dir, rootDir) {
                 if (!Array.isArray(entries)) {
                     entries = [entries];         
                 }
-                var text = "";
+                
                 for (let entry of entries) {
                     // This is the ID to use for entries - will prepend # for ones that are not files
                     const entryUrl = path.join(newDir, entry.eid);
-                    
-                
+                    fs.mkdirpSync(path.join(rootDir, entryUrl));
+                    // Write a copy of the JSON metafdata
+                    apiFileName = `api${count++}.json`
+                    jsonId = path.join(entryUrl, apiFileName);
+                    const json = {"@id": jsonId};
+                    json["@type"] = "File";
+                    json.name = apiFileName;
+                    json["description"] = "JSON Metadata from the LabArchives API as retrieved"
+                    json.url = entry["entry-url"]
+                    crate.getGraph().push(json);
+                    page.hasPart.push({"@id": jsonId});
+                    const jsonPath = path.join(rootDir, jsonId);
+                    fs.writeFileSync(jsonPath, JSON.stringify(entry, null, 2));
 
                     //console.log("Setting outDir", outDir);
-                    console.log("Getting entry with ID:", entry.eid);
-                    
-                    if (entry["entry-data"] && !(entry["entry-data"]["$"] && entry["entry-data"]["$"]['nil']=== 'true')) {
+                    //console.log("Getting entry with ID:", entry.eid);
+                    var text = "";
+                    if (entry['part-type'] === "heading") {
+                        text += `<h1>${entry["entry-data"]}</h1>`
+                    } else if (entry["entry-data"] && !(entry["entry-data"]["$"] && entry["entry-data"]["$"]['nil']=== 'true')) {
                         // TODO Make separate pages w/ entries
-                        text +=  entry["entry-data"]; 
+                       text += entry["entry-data"]; 
                     } 
                     //const entry = await la.getEntry(key, uid, e.eid);
                     //console.log(util.inspect(entry, false, null));
-                    if (entry['part-type'] === "heading") {
-                        text += `<h1>${text}</h1>`
+                    
+                    if (entry["part-type"] === "widget entry" && entry["snapshot"] === "snapshot_exists") {
+                        //https://<baseurl>/api/entries/entry_snapshot?uid=285489257Ho's9^Lt4116011183268315271&eid=sdfjkshdfkjshdfkjhskdjfhskjdfh&<Call Authentication Parameters>
+                        const filename = await la.getSnapshot(key, uid, entry.eid, path.join(rootDir, entryUrl));
+
+                        const fileId = path.join(entryUrl, filename);
+                        const file = {"@id": fileId};
+                        // Absolute path to write file into
+                        // Todo - move the file
+                        file["@type"] = "File";
+                        crate.getGraph().push(file);
+                        page.hasPart.push({"@id": fileId}); 
+                        text += `<figure><img style='width:50%' src='${fileId}' alt='Widget snapshot'><br/></figure>`;
                     }
                     
                     if (entry["part-type"] === "Attachment") {
@@ -93,25 +136,27 @@ async function getPages(key, uid, nbid, parentId, dataset, dir, rootDir) {
                         if (out.match(/\.(jpe?g|png)$/i)) {
                             //console.log(util.inspect(entry, false, null));
                             file.description = entry.caption;
-                            text += `<figure><img style='width:50%' src='${fileId}' alt='${entry.caption}'><br/><figcation>${entry.caption}</figcation></figure>`
-                        }            
-                        text += `<h2>⬇️🏷️ Download: <a href='${fileId}'>${entry['attach-file-name']}</a></h2>\n`;   
-                        // Make a directory for the file
-                        fs.mkdirpSync(path.join(rootDir, entryUrl));
+                           text += `<figure><img style='width:50%' src='${fileId}' alt='${entry.caption}'><br/><figcation>${entry.caption}</figcation></figure>`;
+                        }
+                        if (out.match(/\.pdf$/i)) {
+                             text += `<embed src="./${fileId}" type="application/pdf" width="60%" height="600px" />`;
+                        }        
+                        
+                        text += `<p>⬇️🏷️ Download: <a href='${fileId}'>${entry['attach-file-name']}</a></p>\n`; 
+
                         //Get the file
                         await la.getEntryAttachment(key, uid, entry.eid, out);
                     } 
 
-                    if (text.length > 0) {
-                        page.articleBody = text;
-                    }
+                    addTextItem(page, text, entry, crate);  
+
                     //const att = await la.getEntryAttachment(key, uid, e.eid);
                     //console.log(util.inspect(att, false, null));
                 }
             }
         } else {
             page["@type"] = "Dataset";
-            console.log("Recursing into dir", page.name)
+            //console.log("Recursing into dir", page.name)
                                    // key, uid, nbid, parentId,       dataset, dir,   rootDir
             const done = await getPages(key, uid, nbid, node["tree-id"], page, newDir, rootDir)
         }

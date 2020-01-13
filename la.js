@@ -6,6 +6,7 @@ const _ = require('underscore');
 const xml2js = require('xml2js');
 const parser = new xml2js.Parser({explicitArray: false});
 const fs = require('fs-extra');
+const path = require('path');
 
 
 module.exports = {
@@ -182,13 +183,37 @@ module.exports = {
     let req = `${config.baseurl}${config.api}/entries/${method}`;
     req += `?uid=${uid}&eid=${eid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
-    console.log("URL", req)
 
     return axios
       .get(req, base)
       .then((response) => {
         response.data.pipe(fs.createWriteStream(out));
         
+        })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+  getSnapshot: function (key, uid, eid, outPath) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000,
+      responseType: 'stream'
+    };
+    const method = 'entry_snapshot';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    req += `?uid=${uid}&eid=${eid}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+
+    return axios
+      .get(req, base)
+      .then((response) => {
+        const filename = response.headers["content-disposition"];
+        const out = path.join(outPath, filename);
+        response.data.pipe(fs.createWriteStream(out));
+        return filename;
         })
       .catch((error) => {
         return Promise.reject(error.message)
@@ -206,7 +231,6 @@ module.exports = {
     req += `?uid=${uid}&nbid=${nbid}&page_tree_id=${pageTreeId}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     req += `&entry_data=true&comment_data=true`;
-    console.log("REQUEST", req);
     return axios
       .get(req, base)
       .then((response) => {
@@ -332,7 +356,6 @@ module.exports = {
     let req = `${config.baseurl}${config.api}/notebooks/${method}`;
     req += `?uid=${uid}&nbid=${nbid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
-    console.log(req);
     return axios
       .get(req, base)
       .then((response) => {
