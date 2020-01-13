@@ -4,6 +4,9 @@ const tags = require('common-tags');
 const _ = require('underscore');
 const xml2js = require('xml2js');
 const parser = new xml2js.Parser({explicitArray: false});
+const fs = require('fs-extra');
+const path = require('path');
+
 
 module.exports = {
   callAuthentication: function (key, method) {
@@ -136,6 +139,114 @@ module.exports = {
         return Promise.reject(error.message)
       })
   },
+  getEntry: function (key, uid, eid) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'entry_info';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    req += `?uid=${uid}&eid=${eid}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    req += `&entry_data=true&comment_data=true`;
+
+
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+  getEntryAttachment: function (key, uid, eid, out) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000,
+      responseType: 'stream'
+    };
+    const method = 'entry_attachment';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    req += `?uid=${uid}&eid=${eid}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+
+    return axios
+      .get(req, base)
+      .then((response) => {
+        response.data.pipe(fs.createWriteStream(out));
+
+        })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+  getSnapshot: function (key, uid, eid, outPath) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000,
+      responseType: 'stream'
+    };
+    const method = 'entry_snapshot';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    req += `?uid=${uid}&eid=${eid}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+
+    return axios
+      .get(req, base)
+      .then((response) => {
+        const filename = response.headers["content-disposition"];
+        const out = path.join(outPath, filename);
+        response.data.pipe(fs.createWriteStream(out));
+        return filename;
+        })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+  getEntriesForPage: function (key, uid, nbid, pageTreeId) {
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'get_entries_for_page';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
+    req += `?uid=${uid}&nbid=${nbid}&page_tree_id=${pageTreeId}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    req += `&entry_data=true&comment_data=true`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
   getTree: function (key, uid, nbid, parentTreeId) {
     const base = {
       baseURL: key.baseurl,
@@ -164,6 +275,36 @@ module.exports = {
         return Promise.reject(error.message)
       })
   },
+  getNode: function (key, uid, nbid, nodeId) {
+    // This returns the same info as get_tree
+    const base = {
+      baseURL: config.baseurl,
+      timeout: 10000
+    };
+    const method = 'get_node';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
+    req += `?uid=${uid}&nbid=${nbid}&tree_id=${nodeId}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
+  },
+
   insertNode: function (key, uid, nbid, parentTreeId, displayText, isFolder) {
     const base = {
       baseURL: key.baseurl,
@@ -201,6 +342,35 @@ module.exports = {
           }
         });
       });
+  },
+  backupNotebook: function (key, uid, nbid) {
+    // This returns the same info as get_tree
+    const base = {
+      baseURL: key.baseurl,
+      timeout: 10000
+    };
+    const method = 'notebook_backup';
+    const callAuth = this.callAuthentication(key, method);
+    uid = encodeURIComponent(uid);
+    let req = `${key.baseurl}${key.api}/notebooks/${method}`;
+    req += `?uid=${uid}&nbid=${nbid}`;
+    req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
+    return axios
+      .get(req, base)
+      .then((response) => {
+        return new Promise(function (resolve, reject) {
+          parser.parseString(response.data, function (err, result) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(error.message)
+      })
   },
   addEntry: function (key, uid, nbid, pid, partType, entryData) {
     const base = {
