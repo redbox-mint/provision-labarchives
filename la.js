@@ -141,13 +141,13 @@ module.exports = {
   },
   getEntry: function (key, uid, eid) {
     const base = {
-      baseURL: config.baseurl,
+      baseURL: key.baseurl,
       timeout: 10000
     };
     const method = 'entry_info';
     const callAuth = this.callAuthentication(key, method);
     uid = encodeURIComponent(uid);
-    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    let req = `${key.baseurl}${key.api}/entries/${method}`;
     req += `?uid=${uid}&eid=${eid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     req += `&entry_data=true&comment_data=true`;
@@ -172,14 +172,14 @@ module.exports = {
   },
   getEntryAttachment: function (key, uid, eid, out) {
     const base = {
-      baseURL: config.baseurl,
+      baseURL: key.baseurl,
       timeout: 10000,
       responseType: 'stream'
     };
     const method = 'entry_attachment';
     const callAuth = this.callAuthentication(key, method);
     uid = encodeURIComponent(uid);
-    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    let req = `${key.baseurl}${key.api}/entries/${method}`;
     req += `?uid=${uid}&eid=${eid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
 
@@ -195,14 +195,14 @@ module.exports = {
   },
   getSnapshot: function (key, uid, eid, outPath) {
     const base = {
-      baseURL: config.baseurl,
+      baseURL: key.baseurl,
       timeout: 10000,
       responseType: 'stream'
     };
     const method = 'entry_snapshot';
     const callAuth = this.callAuthentication(key, method);
     uid = encodeURIComponent(uid);
-    let req = `${config.baseurl}${config.api}/entries/${method}`;
+    let req = `${key.baseurl}${key.api}/entries/${method}`;
     req += `?uid=${uid}&eid=${eid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
 
@@ -220,13 +220,13 @@ module.exports = {
   },
   getEntriesForPage: function (key, uid, nbid, pageTreeId) {
     const base = {
-      baseURL: config.baseurl,
+      baseURL: key.baseurl,
       timeout: 10000
     };
     const method = 'get_entries_for_page';
     const callAuth = this.callAuthentication(key, method);
     uid = encodeURIComponent(uid);
-    let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
+    let req = `${key.baseurl}${key.api}/tree_tools/${method}`;
     req += `?uid=${uid}&nbid=${nbid}&page_tree_id=${pageTreeId}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     req += `&entry_data=true&comment_data=true`;
@@ -278,13 +278,13 @@ module.exports = {
   getNode: function (key, uid, nbid, nodeId) {
     // This returns the same info as get_tree
     const base = {
-      baseURL: config.baseurl,
+      baseURL: key.baseurl,
       timeout: 10000
     };
     const method = 'get_node';
     const callAuth = this.callAuthentication(key, method);
     uid = encodeURIComponent(uid);
-    let req = `${config.baseurl}${config.api}/tree_tools/${method}`;
+    let req = `${key.baseurl}${key.api}/tree_tools/${method}`;
     req += `?uid=${uid}&nbid=${nbid}&tree_id=${nodeId}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     return axios
