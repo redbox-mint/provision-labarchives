@@ -187,7 +187,7 @@ module.exports = {
       .get(req, base)
       .then((response) => {
         response.data.pipe(fs.createWriteStream(out));
-        
+
         })
       .catch((error) => {
         return Promise.reject(error.message)
@@ -304,7 +304,7 @@ module.exports = {
         return Promise.reject(error.message)
       })
   },
-  
+
   insertNode: function (key, uid, nbid, parentTreeId, displayText, isFolder) {
     const base = {
       baseURL: key.baseurl,
@@ -346,13 +346,13 @@ module.exports = {
   backupNotebook: function (key, uid, nbid) {
     // This returns the same info as get_tree
     const base = {
-      baseURL: config.baseurl,
+      baseURL: key.baseurl,
       timeout: 10000
     };
     const method = 'notebook_backup';
     const callAuth = this.callAuthentication(key, method);
     uid = encodeURIComponent(uid);
-    let req = `${config.baseurl}${config.api}/notebooks/${method}`;
+    let req = `${key.baseurl}${key.api}/notebooks/${method}`;
     req += `?uid=${uid}&nbid=${nbid}`;
     req += `&akid=${key.akid}&expires=${callAuth.expires}&sig=${callAuth.sig}`;
     return axios
