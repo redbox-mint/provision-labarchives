@@ -2,12 +2,12 @@ const util = require('util');
 const parseString = require('xml2js').parseString;
 const fs = require('fs');
 
-const la = require('./la');
+const la = require('../la');
 
 //User login
 const username = process.argv[2];
 const password = process.argv[3];
-const keyPath = './key.json';
+const keyPath = '../key.json';
 let key = {};
 
 if (fs.existsSync(keyPath)) {

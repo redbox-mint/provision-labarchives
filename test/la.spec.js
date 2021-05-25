@@ -7,24 +7,30 @@ const assert = require('assert');
 const util = require('util');
 const xml2js = require('xml2js');
 const parser = new xml2js.Parser({explicitArray: false});
+const fs = require('fs-extra');
 
 const la = require('../la');
 
 const USERNAME = process.env.USERNAME;
 const PASSWORD = process.env.PASSWORD;
-const keyString = process.env.KEY;
 
 assert.notEqual(USERNAME, undefined, 'USERNAME missing; add environment variable');
 assert.notEqual(PASSWORD, undefined, 'PASSWORD missing; add environment variable');
-assert.notEqual(keyString, undefined, 'KEY missing; add environment variable');
 
 let key = {};
 
 try {
-  key = JSON.parse(keyString);
+  let keyString = process.env.KEY;
+  if (!keyString) {
+    key = fs.readJSONSync(process.cwd() + '/key.json');
+  } else {
+    key = JSON.parse(keyString);
+  }
 } catch (error) {
+  assert.error(error, 'KEY missing; add environment variable');
   process.exit(error);
 }
+assert.notEqual(key, {}, 'KEY missing; add environment variable');
 
 let userInfo = {};
 

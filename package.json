@@ -1,6 +1,6 @@
 {
   "name": "@uts-eresearch/provision-labarchives",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Lab archives APIs interface for node",
   "main": "la.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@code.research.uts.edu.au:eresearch/provision-labarchives.git"
+    "url": "https://github.com/UTS-eResearch/provision-labarchives.git"
   },
   "keywords": [
     "labarchives",
@@ -17,14 +17,14 @@
   "author": "Moises Sacal Bonequi",
   "license": "GPL-3.0",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "common-tags": "^1.4.0",
-    "fs-extra": "^8.1.0",
-    "lodash": "^4.17.15",
-    "underscore": "^1.8.3",
+    "lodash": "^4.17.21",
+    "underscore": "^1.12.1",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
+    "fs-extra": "^8.1.0",
     "mocha": "^6.1.4"
   }
 }
